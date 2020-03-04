@@ -1,0 +1,5 @@
+---
+_src_file: "publish.zip"
+_dest_file: "C:\\myapp\\"
+_default_web_site_path: "C:\\inetpub\\wwwroot"
+_service_path: "C:\\myapp\\TestPropject\\TestProject.exe"

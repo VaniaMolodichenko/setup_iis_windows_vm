@@ -1,0 +1,74 @@
+---
+#--------Install componets---------
+- name: Install IIS
+  win_feature:
+    name:
+    - Web-Server
+    - Web-Common-Http
+    state: present
+    include_sub_features: yes
+    include_management_tools: no
+- name: Install aspnetcore-runtimepackagestore
+  win_chocolatey:
+    name: aspnetcore-runtimepackagestore
+    state: present
+    version: 3.1.2
+  register: rg
+- debug:
+    var: rg
+
+- name: Ensure dotnetcore-windowshosting installed
+  win_chocolatey:
+    name: dotnetcore-windowshosting
+    state: present
+    version: 3.1.2
+
+- name: Install .net core runtime
+  win_chocolatey:
+    name: dotnetcore-runtime
+    state: present
+    version: 3.1.2
+  register: rg
+- debug: 
+    var: rg
+
+#--------Files---------
+
+- name: Clear default directory
+  win_file:
+    path: "{{ _default_web_site_path }}"
+    state: absent
+
+- name: Create directory
+  win_file:
+    path: "{{ _default_web_site_path }}"
+    state: directory
+
+- name: Copy files
+  win_copy:
+    src: "{{ _src_file }}"
+    dest: "{{ _default_web_site_path }}\\"
+
+- name: Unzip file
+  win_unzip:
+    src: "{{ _default_web_site_path }}\\{{ _src_file }}"
+    dest: "{{ _default_web_site_path }}\\"
+
+
+#--------Start server---------
+
+- name: Remove default website
+  win_iis_website:
+    name: "Default Web site"
+    state: absent
+
+- name: IIS site
+  win_iis_website:
+    name: "MyWebsite"
+    state: started
+    port: 80
+    application_pool: "DefaultAppPool"
+    physical_path: "{{ _default_web_site_path }}\\publish\\"
+  register: website
+- debug: 
+    var: website
